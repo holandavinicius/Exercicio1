@@ -28,6 +28,7 @@ $config = [
             'showScriptName' => false,
             'rules' => [
                 'site/listar-tarefas' => 'site/listarTarefas',
+                'site/adicionar-tarefa' => 'site/adicionarTarefa',
             ],
         ],
         'errorHandler' => [

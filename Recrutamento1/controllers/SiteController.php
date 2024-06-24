@@ -12,6 +12,7 @@ use app\models\ContactForm;
 use app\models\Tarefa;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
+use yii\web\Request;
 
 class SiteController extends Controller
 {
@@ -69,7 +70,7 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        $query = Tarefa::find()->select(['TituloTarefa', 'DataCriacao', 'DataConclusao', 'Estado', 'Descricao']);
+        $query = Tarefa::find()->select(['Id','TituloTarefa', 'DataCriacao', 'DataConclusao', 'Estado', 'Descricao']);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
@@ -118,7 +119,6 @@ class SiteController extends Controller
 
     public function actionModalEditar($id)
     {
-        // Encontrar o modelo com base no ID
         $model = Tarefa::findOne($id);
 
         if (!$model) {
@@ -128,5 +128,26 @@ class SiteController extends Controller
         return $this->renderAjax('_modal_content', [
             'model' => $model,
         ]);
+    }
+
+    public function actionAdicionarTarefa()
+    {
+        $model = new Tarefa();
+
+        $data = json_decode(Yii::$app->request->getRawBody(), true);
+
+        $model->TituloTarefa = $data['tituloTarefa'];
+        $model->Descricao = $data['descricao'];
+        $model->DataCriacao = $data['dataCriacao'];
+        $model->DataConclusao = $data['dataConclusao'];
+        $model->Estado = $data['estado'];
+
+        if ($model->save()) {
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return ['success' => true, 'message' => 'Tarefa adicionada com sucesso.'];
+        } else {
+            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return ['success' => false, 'message' => 'Erro ao adicionar a tarefa.', 'errors' => $model->errors];
+        }
     }
 }

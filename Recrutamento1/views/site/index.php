@@ -56,7 +56,7 @@ GridViewAsset::register($this);
                         return Html::a('<span>Editar</span>', '#bt-editar', [
                             'title' => 'Editar',
                             'data-bs-toggle' => 'modal',
-                            'data-bs-target' => '#reg-modal',
+                            'data-bs-target' => '#modal',
                             'data-id' => $model->Id,
                             'class' => 'btn btn-primary btn-xs',
                         ]);
@@ -74,63 +74,91 @@ GridViewAsset::register($this);
             ],
         ],
     ]); ?>
-    <!-- O modal editar -->
-    <div class="modal fade" id="reg-modal" tabindex="-1" aria-labelledby="modal-title" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modal-title">Editar Tarefa</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <label for="tituloTarefa" class="form-label">Título da Tarefa</label>
-                    <input type="text" class="form-control" id="tituloTarefa" name="tituloTarefa">
-                    <label for="tituloTarefa" class="form-label">Descricao</label>
-                    <input type="text" class="form-control" id="descricao" name="descricao">
-                    <label for="tituloTarefa" class="form-label">Data Criação</label>
-                    <input type="text" class="form-control" id="dataCriacao" name="dataCriacao">
-                    <label for="tituloTarefa" class="form-label">Data Conclusão</label>
-                    <input type="text" class="form-control" id="dataConclusao" name="dataConclusao">
-                    <label for="tituloTarefa" class="form-label">Estado</label>
-                    <input type="text" class="form-control" id="estado" name="estado">
 
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-primary">Submit</button>
+    <div class="text-right">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal-adicionar">
+            Adicionar Tarefa
+        </button>
+        <!-- O modal editar -->
+        <div class="modal fade" id="modal-adicionar" tabindex="-1" aria-labelledby="modal-title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modal-title">Adicionar Tarefa</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form-adicionar">
+                            <div class="mb-3">
+                                <label for="tituloTarefa" class="form-label">Título da Tarefa</label>
+                                <input type="text" class="form-control" id="tituloTarefa" name="tituloTarefa" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="descricao" class="form-label">Descrição</label>
+                                <input type="text" class="form-control" id="descricao" name="descricao">
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label for="dataCriacao" class="form-label">Data Criação</label>
+                                    <input type="date" class="form-control" id="dataCriacao" name="dataCriacao">
+                                </div>
+                                <div class="col">
+                                    <label for="dataConclusao" class="form-label">Data Conclusão</label>
+                                    <input type="date" class="form-control" id="dataConclusao" name="dataConclusao">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="estado" class="form-label">Estado</label>
+                                <select class="form-select" id="estado" name="estado">
+                                    <option value="Em Curso">Em Curso</option>
+                                    <option value="Finalizado">Finalizado</option>
+                                    <option value="Pendente">Pendente</option>
+                                </select>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">Adicionar Tarefa</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script>
-        $(document).on('click', '#bt-editar', function(e) {
-            e.preventDefault();
+        <script>
+            $(document).on('submit', '#form-adicionar', function(e) {
+                e.preventDefault();
 
-            var id = $(this).data('id');
-            console.log('ID da tarefa:', id);
-            var url = '/site/modalEditar?id=' + id;
+                var formData = {
+                    tituloTarefa: $('#tituloTarefa').val(),
+                    descricao: $('#descricao').val(),
+                    dataCriacao: $('#dataCriacao').val(),
+                    dataConclusao: $('#dataConclusao').val(),
+                    estado: $('#estado').val()
+                };
 
-            $.ajax({
-                type: 'GET',
-                url: url,
-                success: function(data) {
-                    $('#tituloTarefa').val(data.TituloTarefa);
-                    $('#descricao').val(data.Descricao);
-                    $('#dataCriacao').val(data.DataCriacao);
-                    $('#dataConclusao').val(data.DataConclusao);
-                    $('#estado').val(data.Estado);
-                    $('#reg-modal').modal('show');
-                },
-                error: function(xhr, status, error) {
-                    console.error(error);
-                }
+                $.ajax({
+                    type: 'POST',
+                    url: 'site/adicionar-tarefa', 
+                    data: JSON.stringify(formData),
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log('Tarefa adicionada com sucesso:', response);
+
+                        $('#form-adicionar')[0].reset();
+
+
+                        $.pjax.reload({
+                            container: '#grid-view'
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erro ao adicionar tarefa:', error);
+                    }
+                });
             });
-        });
-    </script>
+        </script>
 
-</div>
-<div class="text-right">
-    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal-add">
-        Adicionar Tarefa
-    </button>
+    </div>
+
 </div>
 </div>

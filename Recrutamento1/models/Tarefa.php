@@ -9,7 +9,7 @@ class Tarefa extends ActiveRecord
 {
     public static function tableName()
     {
-        return 'tarefas'; // Nome real da sua tabela no banco de dados
+        return 'tarefas';
     }
 
     public function rules()
